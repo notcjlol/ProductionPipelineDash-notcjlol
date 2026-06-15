@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import dashboardRouter from './routes/dashboard';
-import { requireAuth } from './middleware/auth';
+import { requireAuth, requireInternalSecret } from './middleware/auth';
 
 export const app = express();
 const PORT = process.env.PORT ?? 3002;
@@ -43,7 +43,7 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // Routes
-app.use('/dashboard', requireAuth, dashboardRouter);
+app.use('/dashboard', requireInternalSecret, dashboardRouter);
 
 if (require.main === module) {
   app.listen(PORT, () => {

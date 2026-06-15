@@ -43,3 +43,28 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     return res.status(401).json({ error: 'Invalid or expired token.' });
   }
 }
+
+/**
+ * Simple internal secret verification middleware.
+ * Used for server-to-server communication where a user session isn't available.
+ */
+export function requireInternalSecret(req: Request, res: Response, next: NextFunction) {
+  const secret = process.env.INTERNAL_API_SECRET;
+
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[auth] FATAL: INTERNAL_API_SECRET not set in production.');
+      return res.status(503).json({ error: 'Internal security service unavailable.' });
+    }
+    // In dev, skip if not set
+    return next();
+  }
+
+  const providedSecret = req.headers['x-internal-secret'];
+  if (providedSecret !== secret) {
+    return res.status(401).json({ error: 'Invalid or missing internal secret.' });
+  }
+
+  return next();
+}
+

@@ -10,6 +10,14 @@ export async function getDashboardData(accessToken?: string): Promise<DashboardP
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
+
+  // 1. Always attach internal secret for server-to-server auth
+  const internalSecret = process.env.INTERNAL_API_SECRET;
+  if (internalSecret) {
+    headers['x-internal-secret'] = internalSecret;
+  }
+
+  // 2. Attach user token if provided (optional for now)
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
